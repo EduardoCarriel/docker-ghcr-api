@@ -4,7 +4,7 @@ const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Versão 1.0.3 - Correção aplicada com sucesso! 🛠️',
+    message: 'Versão 1.0.4 - Correção aplicada com sucesso! 🛠️',
     timestamp: new Date()
   });
 });

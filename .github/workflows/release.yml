@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
     # Novo: O workflow agora dispara quando você sobe uma tag começando com 'v'
-    tags: [ 'v*.*.*' ]
+    tags: [ '*.*.*' ]
   workflow_dispatch:
 
 env:
