@@ -4,7 +4,7 @@ const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Olá! API rodando via Docker e GitHub Actions 🚀',
+    message: 'Versão 1.0.3 - Correção aplicada com sucesso! 🛠️',
     timestamp: new Date()
   });
 });
