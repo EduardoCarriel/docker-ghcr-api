@@ -1,0 +1,59 @@
+name: Docker Build & Publish
+
+on:
+  push:
+    branches: [ "main" ]
+    # Novo: O workflow agora dispara quando você sobe uma tag começando com 'v'
+    tags: [ 'v*.*.*' ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Novo: Configuração avançada de metadados para SemVer
+      - name: Extrair metadados (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Aqui está a mágica do versionamento:
+          tags: |
+            # Gera tag semver exata (ex: 1.2.3) quando git tag é v1.2.3
+            type=semver,pattern={{version}}
+            
+            # Gera tag de major.minor (ex: 1.2) - útil para atualizações compatíveis
+            type=semver,pattern={{major}}.{{minor}}
+            
+            # Define 'latest' apenas se for uma tag de versão (evita latest instável de branch)
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
+            
+            # Mantém o SHA curto para rastreabilidade (sempre bom ter)
+            type=sha
+
+      - name: Build e Push da imagem Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Usa as tags geradas automaticamente pelo passo anterior
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
